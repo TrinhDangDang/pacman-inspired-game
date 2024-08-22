@@ -1,7 +1,6 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext("2d");
 
-ctx.fillStyle = "red";
 
 
 
@@ -15,12 +14,18 @@ class Pacman {
    
   }
   draw(){
+    ctx.save()
+    ctx.fillStyle = "red";
     ctx.fillRect(this.x, this.y, this.width, this.height)
+    
+    ctx.restore()
   }
   
   hitwall(){
+    
+    
     return (
-      this.x <= 0 || 
+      map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 || 
       this.x + this.width >= canvas.width || 
       this.y <= 0 || 
       this.y + this.height >= canvas.height
@@ -28,18 +33,18 @@ class Pacman {
   }
  
   pauseMoving(){
-    switch(this.direction){  //the character doesn't actually paused, the loop keeps going , so the chacracter actually keep moving back and forth when it hit the wall, but if the x, and y values being updated is only 1 then it moveForward cancel pauseMoving and the character appears to pause when hitting the wall.
+    switch(this.direction){
       case "ArrowUp":
-        this.y += 4
+        this.y += 0.5;
         break;
       case "ArrowDown":
-        this.y -= 4
+        this.y -= 0.5;
         break;
       case "ArrowLeft":
-        this.x += 4
+        this.x += 0.5;
         break;
       case "ArrowRight":
-        this.x -= 4;
+        this.x -= 0.5;
         break;
     }
   }
@@ -47,16 +52,16 @@ class Pacman {
   moveForward(){
     switch(this.direction){
       case "ArrowUp":
-        this.y -= 1
+        this.y -= 0.5
         break;
       case "ArrowDown":
-        this.y += 1
+        this.y += 0.5
         break;
       case "ArrowLeft":
-        this.x -= 1
+        this.x -= 0.5
         break;
       case "ArrowRight":
-        this.x += 1;
+        this.x += 0.5;
         break;
     }
   }
@@ -78,11 +83,14 @@ window.addEventListener('keydown', (event) => {
       break;
   }
 });
-const pacman = new Pacman(5,5, 10, 10, '')
+const pacman = new Pacman(5,5, 4, 4, '')
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
   pacman.moveForward();
-    document.getElementById('output').textContent = `${pacman.x}   ${pacman.y}`
+  let gridX = Math.floor(pacman.x/blockSize);
+  let gridY = Math.floor(pacman.y/blockSize);
+  drawMap();
+    document.getElementById('output').textContent = `${pacman.x}   ${pacman.y}  ${gridX} ${gridY}`
   if (pacman.hitwall()){
     pacman.pauseMoving();
     document.getElementById('output').textContent = `${pacman.x}   ${pacman.y}`
@@ -92,5 +100,50 @@ function animate() {
 
 
 
+let map = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+    [1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+    [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2],
+    [1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+    [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1],
+    [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+];
+
+const blockSize = 5;
+
+function drawMap(){
+map.forEach((row, y)=> {
+  row.forEach((column, x)=> {
+    if(column == 1){
+      ctx.fillRect(x * blockSize, y*blockSize, blockSize, blockSize)
+    }
+  })
+})
+}
+
+drawMap();
+
 let gameInternal = setInterval(animate, 1000/60);
+
+
+
+
+
 
