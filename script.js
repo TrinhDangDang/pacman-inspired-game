@@ -28,7 +28,7 @@ class Pacman {
   }
  
   pauseMoving(){
-    switch(this.direction){
+    switch(this.direction){  //the character doesn't actually paused, the loop keeps going , so the chacracter actually keep moving back and forth when it hit the wall, but if the x, and y values being updated is only 1 then it moveForward cancel pauseMoving and the character appears to pause when hitting the wall.
       case "ArrowUp":
         this.y += 4
         break;
