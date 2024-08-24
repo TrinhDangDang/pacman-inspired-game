@@ -51,16 +51,16 @@ class Pacman {
   pauseMoving(){
     switch(this.direction){
       case "ArrowUp":
-        this.y += 0.5;
+        this.y += 1;
         break;
       case "ArrowDown":
-        this.y -= 0.5;
+        this.y -= 1;
         break;
       case "ArrowLeft":
-        this.x += 0.5;
+        this.x += 1;
         break;
       case "ArrowRight":
-        this.x -= 0.5;
+        this.x -= 1;
         break;
     }
   }
@@ -68,18 +68,26 @@ class Pacman {
   moveForward(){
     switch(this.direction){
       case "ArrowUp":
-        this.y -= 0.5
+        this.y -= 1
         break;
       case "ArrowDown":
-        this.y += 0.5
+        this.y += 1
         break;
       case "ArrowLeft":
-        this.x -= 0.5
+        this.x -= 1
         break;
       case "ArrowRight":
-        this.x += 0.5;
+        this.x += 1;
         break;
     }
+  }
+  
+  eat(){
+   if( map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 2 ){
+     map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] = 3;
+   }else{
+     return;
+   }
   }
 }
 
@@ -109,6 +117,7 @@ function animate() {
   drawFood();
   pacman.changeDirectionIfPossible();
   pacman.moveForward();
+  pacman.eat();
   let gridX = Math.floor(pacman.x/blockSize);
   let gridY = Math.floor(pacman.y/blockSize);
   
@@ -173,7 +182,7 @@ map.forEach((row, y)=> {
 }
 
 
-let gameInternal = setInterval(animate, 1000/60);
+let gameInternal = setInterval(animate, 1000/24);
 
 
 
