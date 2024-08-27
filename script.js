@@ -263,7 +263,7 @@ function drawMap(){
 map.forEach((row, y)=> {
   row.forEach((column, x)=> {
     if(column == 1){
-      ctx.fillRect(x * blockSize, y*blockSize, blockSize, blockSize)
+      ctx.fillRect(x * blockSize, y*blockSize, blockSize, blockSize);
     }
   })
 })
