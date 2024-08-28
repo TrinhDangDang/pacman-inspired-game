@@ -1,17 +1,17 @@
 body{
-    padding: 25px;
-  }
-  .title {
-      color: #5C6AC4;
-  }
-  #canvas {
-    border: 2px solid black;
-    width: 800px;
-    height: 600px;
-  }
-  
-  #output{
-    background-color: blue;
-    width: 200px;
-    height: 200px;
-  }
+  padding: 25px;
+}
+.title {
+	color: #5C6AC4;
+}
+#canvas {
+  border: 2px solid black;
+  width: 1200px;
+  height: 600px;
+}
+
+#output{
+  background-color: blue;
+  width: 200px;
+  height: 200px;
+}

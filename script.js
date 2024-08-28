@@ -24,7 +24,10 @@ class Pacman {
   
   hitwall(){
     return (
-      map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 || 
+      map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
+      map[Math.floor((this.y + 4.999)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
+      map[Math.floor(this.y /blockSize)][Math.floor((this.x + 4.999)/blockSize)] == 1 ||
+      map[Math.floor((this.y + 4.99)/blockSize)][Math.floor((this.x + 4.999)/blockSize)] == 1 ||
       this.x + this.width >= canvas.width || 
       this.y <= 0 || 
       this.y + this.height >= canvas.height
@@ -91,9 +94,6 @@ class Pacman {
 
 
 
-
-
-
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 'ArrowUp':
@@ -128,12 +128,15 @@ class Ghost {
     this.direction = directions[randomIndex];  // Set initial random direction  // Make sure initial and next direction match
   }
 
-  hitwall(){
+ hitwall(){
     return (
-      map[Math.floor(this.y / blockSize)][Math.floor(this.x / blockSize)] == 1 || 
-      this.x + this.width > canvas.width || 
-      this.y < 0 || 
-      this.y + this.height > canvas.height
+      map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
+      map[Math.floor((this.y + 4.999)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
+      map[Math.floor(this.y /blockSize)][Math.floor((this.x + 4.999)/blockSize)] == 1 ||
+      map[Math.floor((this.y + 4.99)/blockSize)][Math.floor((this.x + 4.999)/blockSize)] == 1 ||
+      this.x + this.width >= canvas.width || 
+      this.y <= 0 || 
+      this.y + this.height >= canvas.height
     );
   }
 
