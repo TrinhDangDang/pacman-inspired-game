@@ -118,14 +118,14 @@ class Ghost {
     this.width = width;
     this.height = height;
     this.color = color;
-    this.direction = '';  // Start with no direction
-    this.randomizeDirection();  // Initialize random direction
+    this.direction = this.randomizeDirection();  // Start with no direction
+      // Initialize random direction
   }
 
   randomizeDirection() {
     const directions = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'];
     const randomIndex = Math.floor(Math.random() * directions.length);
-    this.direction = directions[randomIndex];  // Set initial random direction  // Make sure initial and next direction match
+    return directions[randomIndex];  // Set initial random direction  // Make sure initial and next direction match
   }
 
  hitwall(){
@@ -140,11 +140,14 @@ class Ghost {
     );
   }
 
+ 
   changeDirectionIfPossible() {
     // If ghost hits a wall, randomize direction
     if (this.hitwall()) {
       this.pauseMoving();
-      this.randomizeDirection();
+      let nextDirection = this.randomizeDirection();
+     	
+      this.direction = nextDirection;
     }
   }
 
@@ -225,7 +228,7 @@ function animate() {
 
 let map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
     [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
     [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
@@ -242,10 +245,10 @@ let map = [
     [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
     [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
-    [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 1, 1],
+    [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 2, 1, 1],
     [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
     [1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1],
-    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
@@ -257,7 +260,10 @@ function drawFood() {
     row.forEach(( cell , x) => {
       if (cell == 2) {
          // Set a color for the food
-        ctx.fillRect(x * blockSize, y * blockSize, 2, 2);
+        ctx.fillRect(x * blockSize + 2, y * blockSize + 2, 2, 2);
+      } 
+      if(cell == 3){
+        ctx.fillRect(x * blockSize + 1, y * blockSize + 1, 3, 3);
       }
     });
   });
@@ -274,9 +280,3 @@ map.forEach((row, y)=> {
 
 
 let gameInternal = setInterval(animate, 1000/24);
-
-
-
-
-
-
