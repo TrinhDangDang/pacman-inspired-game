@@ -84,8 +84,8 @@ class Pacman {
   }
   
   eat(){
-   if( map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 2 ){
-     map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] = 3;
+   if( map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 2 || map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 3){
+     map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] = 4;
    }else{
      return;
    }
@@ -263,6 +263,7 @@ function drawFood() {
         ctx.fillRect(x * blockSize + 2, y * blockSize + 2, 2, 2);
       } 
       if(cell == 3){
+        ctx.fillStyle = "black";
         ctx.fillRect(x * blockSize + 1, y * blockSize + 1, 3, 3);
       }
     });
@@ -272,7 +273,12 @@ function drawMap(){
 map.forEach((row, y)=> {
   row.forEach((column, x)=> {
     if(column == 1){
-      ctx.fillRect(x * blockSize, y*blockSize, blockSize, blockSize);
+      ctx.fillStyle = "black"; // Blue color for the walls
+        
+        // Draw the main block of the wall
+        ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+
+      
     }
   })
 })
