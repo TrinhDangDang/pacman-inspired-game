@@ -96,6 +96,7 @@ class Pacman {
   
   eat(){
    if( map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 2 || map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 3){
+     points ++;
      map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] = 4;
    }else{
      return;
@@ -193,7 +194,7 @@ class Ghost {
       case "ArrowRight":
         this.x -= 1;
         break;
-    }
+    } 
   }
 
   draw(){
@@ -205,10 +206,12 @@ class Ghost {
 }
 
 
-
+points = 0;
 const pacman = new Pacman(5,5, 5, 5, '');
-const ghosts = [new Ghost(20,20,5,5, 'blue'), new Ghost(20, 20, 5, 5, 'yello'), new Ghost(20,20,5,5, 'green'), new Ghost(20,20,5,5, 'purple'), new Ghost(20,20,5,5, 'pink')]
+const ghosts = [new Ghost(20,20,5,5, 'blue'), new Ghost(20, 20, 5, 5, 'yello'), new Ghost(20,20,5,5, 'green'), new Ghost(20,20,5,5, 'purple'), new Ghost(20,20,5,5, 'pink')];
+let isGamePaused = false;
 function animate() {
+  if (isGamePaused) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
   drawMap();
   drawFood();
@@ -220,16 +223,25 @@ function animate() {
   let gridY = Math.floor(pacman.y/blockSize);
   
   
-    document.getElementById('output').textContent = `${pacman.x}   ${pacman.y}  ${gridX} ${gridY}`
+    document.getElementById('output').textContent = `${points}`;
   if (pacman.hitwall()){
     pacman.pauseMoving();
-    document.getElementById('output').textContent = `${pacman.x}   ${pacman.y}`
   }
   if (pacman.hitGhost()) {
-    clearInterval(gameInternal); // Stop the game loop
-    alert("Game Over! Pacman hit a ghost."); // Display a game-over message
-    return; // Exit the function
-}
+    isGamePaused = true; // Pause the game
+
+    // Reset positions
+    reset();
+
+    // Optionally show a game-over message
+  
+
+    setTimeout(() => {
+      isGamePaused = false; // Resume the game after 2 seconds
+    }, 3000); // 2000 milliseconds = 2 seconds
+
+    return; // Exit the function to avoid further animation until resume
+  }
 
   pacman.draw();
   ghosts.forEach((ghost, index) => {
@@ -241,7 +253,20 @@ function animate() {
 }
 
 
+function reset(){
+  
+  
+  pacman.x = 5;
+  pacman.y = 5;
+  pacman.direction = "";
+  pacman.nextDirection = "";
 
+  
+  for (ghost of ghosts){
+    ghost.x = 20;
+    ghost.y = 20;
+  }
+}
 
 let map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -302,4 +327,4 @@ map.forEach((row, y)=> {
 }
 
 
-let gameInternal = setInterval(animate, 1000/24);
+let gameInterval = setInterval(animate, 1000/24);
