@@ -34,6 +34,17 @@ class Pacman {
     );
   }
   
+ hitGhost() {
+    for (const ghost of ghosts) {
+        if (
+            Math.floor(ghost.x / blockSize) === Math.floor(this.x / blockSize) &&
+            Math.floor(ghost.y / blockSize) === Math.floor(this.y / blockSize)
+        ) {
+            return true; // Collision detected
+        }
+    }
+    return false; // No collision detected
+}
   changeDirectionIfPossible(){
       if (this.direction == this.nextDirection) return;
         let tempDirection = this.direction;
@@ -214,6 +225,12 @@ function animate() {
     pacman.pauseMoving();
     document.getElementById('output').textContent = `${pacman.x}   ${pacman.y}`
   }
+  if (pacman.hitGhost()) {
+    clearInterval(gameInternal); // Stop the game loop
+    alert("Game Over! Pacman hit a ghost."); // Display a game-over message
+    return; // Exit the function
+}
+
   pacman.draw();
   ghosts.forEach((ghost, index) => {
     ghost.changeDirectionIfPossible();
