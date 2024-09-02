@@ -1,7 +1,10 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext("2d");
+const spongebobFrames = document.getElementById("spongebob");
 
 
+const blockSize = 70;
+speed = blockSize/8;
 
 
 class Pacman {
@@ -16,18 +19,16 @@ class Pacman {
   }
   draw(){
     ctx.save()
-    ctx.fillStyle = "red";
-    ctx.fillRect(this.x, this.y, this.width, this.height)
-    
+    ctx.drawImage(spongebobFrames, 20, 49, 155, 132,  this.x - 10, this.y - 15, 200, 200 )
     ctx.restore()
   }
   
   hitwall(){
     return (
       map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
-      map[Math.floor((this.y + 4.999)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
-      map[Math.floor(this.y /blockSize)][Math.floor((this.x + 4.999)/blockSize)] == 1 ||
-      map[Math.floor((this.y + 4.99)/blockSize)][Math.floor((this.x + 4.999)/blockSize)] == 1 ||
+      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
+      map[Math.floor(this.y /blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
+      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
       this.x + this.width >= canvas.width || 
       this.y <= 0 || 
       this.y + this.height >= canvas.height
@@ -63,16 +64,16 @@ class Pacman {
   pauseMoving(){
     switch(this.direction){
       case "ArrowUp":
-        this.y += 1;
+        this.y += speed;
         break;
       case "ArrowDown":
-        this.y -= 1;
+        this.y -= speed;
         break;
       case "ArrowLeft":
-        this.x += 1;
+        this.x += speed;
         break;
       case "ArrowRight":
-        this.x -= 1;
+        this.x -= speed;
         break;
     }
   }
@@ -80,19 +81,23 @@ class Pacman {
   moveForward(){
     switch(this.direction){
       case "ArrowUp":
-        this.y -= 1
+        this.y -= speed;
         break;
       case "ArrowDown":
-        this.y += 1
+        this.y += speed;
         break;
       case "ArrowLeft":
-        this.x -= 1
+        this.x -= speed;
         break;
       case "ArrowRight":
-        this.x += 1;
+        this.x += speed;
         break;
     }
   }
+  
+  isfinishEating() {
+  return points === 221;
+}
   
   eat(){
    if( map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 2 || map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 3){
@@ -143,9 +148,9 @@ class Ghost {
  hitwall(){
     return (
       map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
-      map[Math.floor((this.y + 4.999)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
-      map[Math.floor(this.y /blockSize)][Math.floor((this.x + 4.999)/blockSize)] == 1 ||
-      map[Math.floor((this.y + 4.99)/blockSize)][Math.floor((this.x + 4.999)/blockSize)] == 1 ||
+      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
+      map[Math.floor(this.y /blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
+      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
       this.x + this.width >= canvas.width || 
       this.y <= 0 || 
       this.y + this.height >= canvas.height
@@ -166,16 +171,16 @@ class Ghost {
   moveForward(){
     switch(this.direction){
       case "ArrowUp":
-        this.y -= 1;
+        this.y -= speed;
         break;
       case "ArrowDown":
-        this.y += 1;
+        this.y += speed;
         break;
       case "ArrowLeft":
-        this.x -= 1;
+        this.x -= speed;
         break;
       case "ArrowRight":
-        this.x += 1;
+        this.x += speed;
         break;
     }
   }
@@ -183,16 +188,16 @@ class Ghost {
   pauseMoving() {
     switch(this.direction){
       case "ArrowUp":
-        this.y += 1;
+        this.y += speed;
         break;
       case "ArrowDown":
-        this.y -= 1;
+        this.y -= speed;
         break;
       case "ArrowLeft":
-        this.x += 1;
+        this.x += speed;
         break;
       case "ArrowRight":
-        this.x -= 1;
+        this.x -= speed;
         break;
     } 
   }
@@ -207,8 +212,8 @@ class Ghost {
 
 
 points = 0;
-const pacman = new Pacman(5,5, 5, 5, '');
-const ghosts = [new Ghost(20,20,5,5, 'blue'), new Ghost(20, 20, 5, 5, 'yello'), new Ghost(20,20,5,5, 'green'), new Ghost(20,20,5,5, 'purple'), new Ghost(20,20,5,5, 'pink')];
+const pacman = new Pacman(blockSize, blockSize, blockSize, blockSize);
+const ghosts = [new Ghost(280,280,70,70, 'blue'), new Ghost(280,280,70,70, 'yellow'), new Ghost(280,280,70,70, 'green'), new Ghost(280,280,70,70, 'purple'), new Ghost(280,280,70,70, 'pink')];
 let isGamePaused = false;
 function animate() {
   if (isGamePaused) return;
@@ -219,8 +224,6 @@ function animate() {
   pacman.moveForward();
   pacman.eat();
   
-  let gridX = Math.floor(pacman.x/blockSize);
-  let gridY = Math.floor(pacman.y/blockSize);
   
   
     document.getElementById('output').textContent = `${points}`;
@@ -242,29 +245,33 @@ function animate() {
 
     return; // Exit the function to avoid further animation until resume
   }
-
+  if (pacman.isfinishEating()) {
+  while (ghosts.length > 0) {
+    ghosts.pop();
+  }
+}
   pacman.draw();
   ghosts.forEach((ghost, index) => {
     ghost.changeDirectionIfPossible();
   ghost.moveForward();
   ghost.draw();
   })
-  
+  requestAnimationFrame(animate);
 }
 
 
 function reset(){
   
   
-  pacman.x = 5;
-  pacman.y = 5;
+  pacman.x = 70;
+  pacman.y = 70;
   pacman.direction = "";
   pacman.nextDirection = "";
 
   
-  for (ghost of ghosts){
-    ghost.x = 20;
-    ghost.y = 20;
+  for (const ghost of ghosts){
+    ghost.x = 280;
+    ghost.y = 280;
   }
 }
 
@@ -294,7 +301,8 @@ let map = [
     [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 ];
 
-const blockSize = 5;
+
+
 
 
 function drawFood() {
@@ -302,11 +310,11 @@ function drawFood() {
     row.forEach(( cell , x) => {
       if (cell == 2) {
          // Set a color for the food
-        ctx.fillRect(x * blockSize + 2, y * blockSize + 2, 2, 2);
+        ctx.fillRect(x * blockSize + 20, y * blockSize + 20, blockSize/3, blockSize/3);
       } 
       if(cell == 3){
         ctx.fillStyle = "black";
-        ctx.fillRect(x * blockSize + 1, y * blockSize + 1, 3, 3);
+        ctx.fillRect(x * blockSize + 20, y * blockSize + 20, blockSize/2, blockSize/2);
       }
     });
   });
@@ -327,4 +335,4 @@ map.forEach((row, y)=> {
 }
 
 
-let gameInterval = setInterval(animate, 1000/24);
+requestAnimationFrame(animate);
