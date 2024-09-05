@@ -15,14 +15,78 @@ class Pacman {
     this.height = height;
     this.direction = "";
     this.nextDirection = "";
+    this.frameCount = 12;
+    this.currentFrame = 1;
+    this.currentFrameX = 1;
+    this.currentFrameY = 1;
+    this.animationStartX = 17;
+    this.animationStartY = 46;
+    this.lastFrameTime = 0;
+    this.frameDuration = 70;
+    this.startAnimation();
    
   }
   draw(){
     ctx.save()
-    ctx.drawImage(spongebobFrames, 20, 49, 155, 132,  this.x - 10, this.y - 15, 200, 200 )
+    ctx.drawImage(spongebobFrames, (this.currentFrameX - 1) * 180 + this.animationStartX, (this.currentFrameY - 1) * 156 + this.animationStartY , 162, 138,  this.x - 90, this.y - 90, 250, 230 );
     ctx.restore()
   }
+
+
+  changeAnimation(){
+
+    //idle animation at:  x: 17, y: 46 width: 162, height 138, 12 frames, 180px horizontal between starting point at frame 1 and starting point of next frame, 156px vertical diffences between frames in first row and frames in second row.
+    // run right: x: 17, y: 387 , frameCount: 8
+    // run down: y: 1906, frameCount : 8
+    // run up: y: 2091, frameCount : 8
+    let cases = this.direction;
+    switch(cases){
+      case "ArrowUp":
+        this.frameCount = 8;
+        this.animationStartY = 2092;
+        break;
+      case "ArrowDown":
+        this.frameCount = 8;
+        this.animationStartY = 1907;
+        break;
+      case "ArrowLeft":
+        this.frameCount = 8;
+        this.animationStartY = 4904;
+        break;
+      case "ArrowRight":
+        this.frameCount = 8;
+        this.animationStartY = 387;
+        break;
+    }
+    if (this.hitwall()){
+      this.frameCount = 12;
+      this.animationStartY = 46;
+    }
+    this.currentFrame = this.currentFrame == this.frameCount? 1 : this.currentFrame + 1;
+    if(this.currentFrame <= 8){
+      this.currentFrameX = this.currentFrame;
+      this.currentFrameY = 1;
+    } else{
+      this.currentFrameX = this.currentFrame - 8;
+      this.currentFrameY = 2;
+    }
+  }
+
+  startAnimation() {
+    const animate = (timestamp) => {
+        const deltaTime = timestamp - this.lastFrameTime;
+        if (deltaTime > this.frameDuration){
+          this.changeAnimation(); // Update the animation frame
+          this.lastFrameTime = timestamp;
+        }
+        
+        requestAnimationFrame(animate); // Loop the animation
+    };
+    this.lastFrameTime = performance.now(); //initialize the last frame time
+    requestAnimationFrame(animate); // Start the animation loop
+}
   
+
   hitwall(){
     return (
       map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
@@ -54,9 +118,7 @@ class Pacman {
         if (this.hitwall()) {
             this.pauseMoving();
             this.direction = tempDirection;
-        } else {
-            this.pauseMoving();
-        }
+        } 
     }
     
 
@@ -76,6 +138,7 @@ class Pacman {
         this.x -= speed;
         break;
     }
+  
   }
  
   moveForward(){
@@ -163,7 +226,6 @@ class Ghost {
     if (this.hitwall()) {
       this.pauseMoving();
       let nextDirection = this.randomizeDirection();
-     	
       this.direction = nextDirection;
     }
   }
@@ -200,6 +262,7 @@ class Ghost {
         this.x -= speed;
         break;
     } 
+    
   }
 
   draw(){
@@ -234,13 +297,15 @@ function animate() {
     isGamePaused = true; // Pause the game
 
     // Reset positions
-    reset();
 
     // Optionally show a game-over message
   
 
     setTimeout(() => {
-      isGamePaused = false; // Resume the game after 2 seconds
+    reset();
+
+      isGamePaused = false; 
+      animate();// Resume the game after 2 seconds
     }, 3000); // 2000 milliseconds = 2 seconds
 
     return; // Exit the function to avoid further animation until resume
