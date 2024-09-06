@@ -1,3 +1,6 @@
+window.onload = () => {
+
+
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext("2d");
 const spongebobFrames = document.getElementById("spongebob");
@@ -16,7 +19,7 @@ class Pacman {
     this.height = height;
     this.direction = "";
     this.nextDirection = "";
-    this.frameCount = 12;
+    this.frameCount = 1;
     this.currentFrame = 1;
     this.currentFrameX = 1;
     this.currentFrameY = 1;
@@ -25,6 +28,7 @@ class Pacman {
     this.lastFrameTime = 0;
     this.frameDuration = 70;
     this.startAnimation();
+    this.direct = '';
    
   }
   draw(){
@@ -40,25 +44,44 @@ class Pacman {
     // run right: x: 17, y: 387 , frameCount: 8
     // run down: y: 1906, frameCount : 8
     // run up: y: 2091, frameCount : 8
-    let cases = this.direction;
-    switch(cases){
-      case "ArrowUp":
-        this.frameCount = 8;
-        this.animationStartY = 2092;
-        break;
-      case "ArrowDown":
-        this.frameCount = 8;
-        this.animationStartY = 1907;
-        break;
-      case "ArrowLeft":
-        this.frameCount = 8;
-        this.animationStartY = 4904;
-        break;
-      case "ArrowRight":
-        this.frameCount = 8;
-        this.animationStartY = 387;
-        break;
-    }
+   
+    switch(this.direct){
+        case "ArrowUp":
+          if (this.animationStartY !== 2092) {
+            this.currentFrame = 1; // Reset frame when switching animation
+          }
+          this.frameCount = 8;
+          this.animationStartY = 2092;
+          break;
+        case "ArrowDown":
+          if (this.animationStartY !== 1907) {
+            this.currentFrame = 1; // Reset frame when switching animation
+          }
+          this.frameCount = 8;
+          this.animationStartY = 1907;
+          break;
+        case "ArrowLeft":
+          if (this.animationStartY !== 4904) {
+            this.currentFrame = 1;
+          }
+          this.frameCount = 8;
+          this.animationStartY = 4904;
+          break;
+        case "ArrowRight":
+          if (this.animationStartY !== 387) {
+            this.currentFrame = 1;
+          }
+          this.frameCount = 8;
+          this.animationStartY = 387;
+          break;
+        case "":
+          if (this.animationStartY !== 46) {
+            this.currentFrame = 1;
+          }
+          this.frameCount = 12;
+          this.animationStartY = 46;
+          break;
+      }
     this.currentFrame = this.currentFrame == this.frameCount? 1 : this.currentFrame + 1;
     if(this.currentFrame <= 8){
       this.currentFrameX = this.currentFrame;
@@ -113,12 +136,12 @@ class Pacman {
       if (this.direction == this.nextDirection) return;
         let tempDirection = this.direction;
         this.direction = this.nextDirection;
-        this.moveForward();
+        this.moveForward(); //move forward to test if it hit the wall
         if (this.hitwall()) {
-          this.pauseMoving();
-            this.direction = tempDirection;
-            
+          this.pauseMoving(); //if hit wall move back (using pauseMoving()) and keep going in the previous direction
+          this.direction = tempDirection;  
         } 
+        this.direct = this.direction;
     }
     
 
@@ -138,7 +161,6 @@ class Pacman {
         this.x -= speed;
         break;
     }
-    
   
   }
  
@@ -208,7 +230,7 @@ class Ghost {
     this.currentFrameX = 1;
     this.lastFrameTime = 0;
     this.frameCount = 10;
-    this.frameDuration = 60;
+    this.frameDuration = 70;
     this.startAnimation();
 
   }
@@ -249,16 +271,16 @@ class Ghost {
   moveForward(){
     switch(this.direction){
       case "ArrowUp":
-        this.y -= speed;
+        this.y -= speed/2;
         break;
       case "ArrowDown":
-        this.y += speed;
+        this.y += speed/2;
         break;
       case "ArrowLeft":
-        this.x -= speed;
+        this.x -= speed/2;
         break;
       case "ArrowRight":
-        this.x += speed;
+        this.x += speed/2;
         break;
     }
   }
@@ -310,9 +332,7 @@ class Ghost {
 points = 0;
 const pacman = new Pacman(blockSize, blockSize, blockSize, blockSize);
 const ghosts = [new Ghost(280,280,70,70, 'blue'), new Ghost(280,280,70,70, 'yellow'), new Ghost(280,280,70,70, 'green'), new Ghost(280,280,70,70, 'purple'), new Ghost(280,280,70,70, 'pink')];
-let isGamePaused = false;
 function animate() {
-  if (isGamePaused) return;
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
   drawMap();
   drawFood();
@@ -325,29 +345,42 @@ function animate() {
   document.getElementById('points').textContent = `POINTS:  ${points}`;
   if (pacman.hitwall()){
     pacman.pauseMoving();
+    pacman.direct = "";
   }
   if (pacman.hitGhost()) {
-    isGamePaused = true; // Pause the game
-
-    // Reset positions
-
-    // Optionally show a game-over message
+    // Pause Pac-Man and ghosts
+    pacman.pauseMoving();
+    ghosts.forEach(ghost => ghost.pauseMoving());
   
-
+    // Optionally show a game-over message or a collision message
+    ctx.save();
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "red";
+    ctx.textAlign = "center";
+    ctx.fillText("Pac-Man Hit a Ghost!", canvas.width / 2, canvas.height / 2);
+    ctx.restore();
+  
+    // Pause the game and reset after 2 seconds
     setTimeout(() => {
-    reset();
-
-      isGamePaused = false; 
-      animate();// Resume the game after 2 seconds
+      // Clear any displayed message
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+      // Reset positions and state
+      reset();
+  
+      // Resume the game animation
+      animate();
     }, 2000); // 2000 milliseconds = 2 seconds
-
+  
     return; // Exit the function to avoid further animation until resume
   }
+  
   if (pacman.isfinishEating()) {
   while (ghosts.length > 0) {
     ghosts.pop();
   }
 }
+  
   pacman.draw();
   ghosts.forEach(ghost => {
     ghost.changeDirectionIfPossible(); // Check if the ghost can change direction
@@ -445,7 +478,9 @@ map.forEach((row, y)=> {
     }
   })
 })
-}
+};
 
 
 requestAnimationFrame(animate);
+
+};
