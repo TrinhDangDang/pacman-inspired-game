@@ -10,13 +10,13 @@ body{
 }
 #canvas {
   border: 2px solid black;
-  width: 728px;
-  height: 750px;
+  width: 700px;
+  height: 700px; /*this width and height set the size of the canvas on the screen, how big the canvas will be, the width and height properties of the canvas inside the html file is different, that one set the pixel density, i think*/
   margin: auto;
 }
 
-#output{
-  background-color: blue;
-  width: 200px;
-  height: 200px;
+#output-and-console{
+  margin-top: 50px;
+  width: auto;
+  height: auto;
 }

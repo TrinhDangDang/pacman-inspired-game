@@ -1,10 +1,11 @@
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext("2d");
 const spongebobFrames = document.getElementById("spongebob");
+const patrickFrames = document.getElementById("patrick");
 
 
 const blockSize = 70;
-speed = blockSize/8;
+speed = blockSize/10;
 
 
 class Pacman {
@@ -58,10 +59,6 @@ class Pacman {
         this.animationStartY = 387;
         break;
     }
-    if (this.hitwall()){
-      this.frameCount = 12;
-      this.animationStartY = 46;
-    }
     this.currentFrame = this.currentFrame == this.frameCount? 1 : this.currentFrame + 1;
     if(this.currentFrame <= 8){
       this.currentFrameX = this.currentFrame;
@@ -92,10 +89,12 @@ class Pacman {
       map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
       map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
       map[Math.floor(this.y /blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
-      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
-      this.x + this.width >= canvas.width || 
-      this.y <= 0 || 
-      this.y + this.height >= canvas.height
+      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 
+      // ||
+    //   this.x + this.width >= canvas.width || 
+    //   this.y <= 0 || 
+    //   this.y + this.height >= canvas.height
+    // 
     );
   }
   
@@ -116,8 +115,9 @@ class Pacman {
         this.direction = this.nextDirection;
         this.moveForward();
         if (this.hitwall()) {
-            this.pauseMoving();
+          this.pauseMoving();
             this.direction = tempDirection;
+            
         } 
     }
     
@@ -138,6 +138,7 @@ class Pacman {
         this.x -= speed;
         break;
     }
+    
   
   }
  
@@ -177,15 +178,19 @@ class Pacman {
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 'ArrowUp':
+      event.preventDefault();
       pacman.nextDirection = 'ArrowUp';
       break;
     case 'ArrowDown':
+      event.preventDefault();
       pacman.nextDirection = 'ArrowDown';
       break;
     case 'ArrowLeft':
+      event.preventDefault();
       pacman.nextDirection = 'ArrowLeft';
       break;
     case 'ArrowRight':
+      event.preventDefault();
       pacman.nextDirection = 'ArrowRight';
       break;
   }
@@ -198,8 +203,14 @@ class Ghost {
     this.width = width;
     this.height = height;
     this.color = color;
-    this.direction = this.randomizeDirection();  // Start with no direction
-      // Initialize random direction
+    this.nextDirection = this.randomizeDirection();  // Initialize random direction
+    this.direction = "";
+    this.currentFrameX = 1;
+    this.lastFrameTime = 0;
+    this.frameCount = 10;
+    this.frameDuration = 60;
+    this.startAnimation();
+
   }
 
   randomizeDirection() {
@@ -213,21 +224,26 @@ class Ghost {
       map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
       map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
       map[Math.floor(this.y /blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
-      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
-      this.x + this.width >= canvas.width || 
-      this.y <= 0 || 
-      this.y + this.height >= canvas.height
+      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 
+      // ||
+      // this.x + this.width >= canvas.width || 
+      // this.y <= 0 || 
+      // this.y + this.height >= canvas.height
     );
   }
 
  
-  changeDirectionIfPossible() {
-    // If ghost hits a wall, randomize direction
-    if (this.hitwall()) {
-      this.pauseMoving();
-      let nextDirection = this.randomizeDirection();
-      this.direction = nextDirection;
-    }
+  changeDirectionIfPossible(){
+    if (this.direction == this.nextDirection) return;
+      let tempDirection = this.direction;
+      this.direction = this.nextDirection;
+      this.moveForward();
+      if (this.hitwall()) {
+          this.pauseMoving();
+          this.direction = tempDirection;
+          
+      } 
+     
   }
 
   moveForward(){
@@ -262,17 +278,34 @@ class Ghost {
         this.x -= speed;
         break;
     } 
-    
+    this.nextDirection = this.randomizeDirection();
   }
 
   draw(){
     ctx.save();
-    ctx.fillStyle = this.color;
-    ctx.fillRect(this.x, this.y, this.width, this.height);
+    ctx.drawImage(patrickFrames, (this.currentFrameX - 1) * 100, 20 , 100, 110, this.x - 70, this.y - 70, 200, 200 );
     ctx.restore();
   }
+
+  changeAnimation() {
+    this.currentFrameX = this.currentFrameX == this.frameCount ? 1 : this.currentFrameX + 1;
+    
 }
 
+  startAnimation() {
+    const animate = (timestamp) => {
+        const deltaTime = timestamp - this.lastFrameTime;
+        if (deltaTime > this.frameDuration){
+          this.changeAnimation(); // Update the animation frame
+          this.lastFrameTime = timestamp;
+        }
+        
+        requestAnimationFrame(animate); // Loop the animation
+    };
+    this.lastFrameTime = performance.now(); //initialize the last frame time
+    requestAnimationFrame(animate); // Start the animation loop
+}
+}
 
 points = 0;
 const pacman = new Pacman(blockSize, blockSize, blockSize, blockSize);
@@ -289,7 +322,7 @@ function animate() {
   
   
   
-    document.getElementById('output').textContent = `${points}`;
+  document.getElementById('points').textContent = `POINTS:  ${points}`;
   if (pacman.hitwall()){
     pacman.pauseMoving();
   }
@@ -306,7 +339,7 @@ function animate() {
 
       isGamePaused = false; 
       animate();// Resume the game after 2 seconds
-    }, 3000); // 2000 milliseconds = 2 seconds
+    }, 2000); // 2000 milliseconds = 2 seconds
 
     return; // Exit the function to avoid further animation until resume
   }
@@ -316,13 +349,28 @@ function animate() {
   }
 }
   pacman.draw();
-  ghosts.forEach((ghost, index) => {
-    ghost.changeDirectionIfPossible();
-  ghost.moveForward();
-  ghost.draw();
-  })
+  ghosts.forEach(ghost => {
+    ghost.changeDirectionIfPossible(); // Check if the ghost can change direction
+    ghost.moveForward();               // Move the ghost in its current direction
+    
+    if (ghost.hitwall()) {
+      ghost.pauseMoving();              // Pause and choose a new direction if a wall is hit
+    }
+    
+    ghost.draw();                       // Draw the ghost on the canvas
+  });
+  
   requestAnimationFrame(animate);
 }
+
+
+
+
+
+
+
+
+
 
 
 function reset(){
