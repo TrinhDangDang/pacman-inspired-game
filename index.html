@@ -3,16 +3,20 @@
   <head>
     <title>SpongeBob</title>
     <link rel="stylesheet" href="styles.css" />
+    <link rel="preload" href="font-emulogic/emulogic.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+
   </head>
   <body>
+    <span id="info-box"><p id="lives">LIVES: <span id="hearts">❤️ ❤️ ❤️</span></p><p id="points">POINTS: 0</p>
+      </span>
+
       <canvas id="canvas" width="1460" height="1600"></canvas>
       <div id="output-and-console">
-        <p>Select an algorithm that patrick will use to catch up with SpongeBob</p>
-        <button>Random</button>
-        <button>Depth First Search</button>
-        <button>Bread First Search</button>
-        <button>A*</button>
-        <p id="points">POINTS: 0</p>
+        <p>Select an algorithm that the Patrick will use to catch up with SpongeBob</p>
+        <p id="display-message"></p>
+        <div id="buttons"><button id="random-movement">Random</button>
+          <button id="bfs-movement-when-in-range">Breadth First Search</button></div>
+        
       </div>
       
       <div style="display: none" >

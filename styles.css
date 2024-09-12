@@ -19,4 +19,42 @@ body{
   margin-top: 50px;
   width: auto;
   height: auto;
+
+}
+
+#buttons {
+  display: flex;
+  justify-content: space-between;
+
+}
+#points{
+  font-family: 'emulogic';
+  font-style: bold;
+  text-shadow:
+  -2px -2px 0 #000, /* Top-left shadow */
+  2px -2px 0 #000,  /* Top-right shadow */
+  -2px 2px 0 #000,  /* Bottom-left shadow */
+  2px 2px 0 #000; 
+  color: yellow;
+}
+
+#lives {
+  font-family: 'emulogic';
+  font-style: bold;
+  text-shadow:
+  -2px -2px 0 #000, /* Top-left shadow */
+  2px -2px 0 #000,  /* Top-right shadow */
+  -2px 2px 0 #000,  /* Bottom-left shadow */
+  2px 2px 0 #000; 
+  color: yellow;
+}
+
+#info-box{
+  width: 700px;
+  display:flex;
+  justify-content: space-between;
+}
+@font-face {
+  font-family: 'emulogic';
+  src: url('font-emulogic/emulogic.ttf') format('opentype');
 }

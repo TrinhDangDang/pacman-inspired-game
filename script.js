@@ -1,14 +1,35 @@
-window.onload = () => {
+
 
 
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext("2d");
 const spongebobFrames = document.getElementById("spongebob");
 const patrickFrames = document.getElementById("patrick");
+const bfsMovementButton = document.getElementById("bfs-movement-when-in-range");
+const randomMovementButton = document.getElementById("random-movement"); // Make sure this ID matches your HTML
+const displayalgorithm = document.getElementById("display-message"); 
+
+let randomButtonValue = false;
+let bfsButtonValue = false;
+
+bfsMovementButton.addEventListener("click", function(){
+  displayalgorithm.textContent = "You are currently selecting Breadth First Search movement for Patrick to chase after SpongeBob";
+  bfsButtonValue = true;
+  randomButtonValue = false;
+});
+
+randomMovementButton.addEventListener("click", function(){
+  displayalgorithm.textContent = "You are currently selecting Random Movement, Patrick will move randomly until he reaches SpongeBob";
+  randomButtonValue = true;
+  bfsButtonValue = false;
+});
+
+let animationId;
 
 
 const blockSize = 70;
-speed = blockSize/10;
+let speed = blockSize/10;
+
 
 
 class Pacman {
@@ -113,11 +134,6 @@ class Pacman {
       map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
       map[Math.floor(this.y /blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
       map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 
-      // ||
-    //   this.x + this.width >= canvas.width || 
-    //   this.y <= 0 || 
-    //   this.y + this.height >= canvas.height
-    // 
     );
   }
   
@@ -179,19 +195,41 @@ class Pacman {
         this.x += speed;
         break;
     }
-  }
-  
-  isfinishEating() {
-  return points === 221;
+    if (this.x < 0) {
+      this.x = canvas.width - 4;
+    } else if (this.x > canvas.width) {
+      this.x = 0;
+    }
+    
 }
   
-  eat(){
-   if( map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 2 || map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 3){
-     points ++;
-     map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] = 4;
-   }else{
-     return;
-   }
+
+  
+eat() {
+  let row = Math.floor(this.y / blockSize);
+  let col = Math.floor(this.x / blockSize);
+  
+  // Check if the current position contains food (2) or collectible (3)
+  if (map[row][col] == 2) {
+    points++;
+    map[row][col] = 4;  // Mark as eaten
+      // Increment points
+  } 
+  if(map[row][col]== 3){
+    points = points + 2;
+    map[row][col] = 4;
+    
+  }
+}
+  isfinishedEating() {
+    for(let i = 0; i < map.length; i++){
+      for(let j = 0; j < map[0].length; j++){
+        if(map[i][j] == 2){
+          return false;
+        }
+      }
+    }
+    return true;
   }
 }
 
@@ -219,18 +257,18 @@ window.addEventListener('keydown', (event) => {
 });
 
 class Ghost {
-  constructor(x, y, width, height, color){
+  constructor(x, y, width, height, range){
     this.x = x;
     this.y = y;
     this.width = width;
     this.height = height;
-    this.color = color;
     this.nextDirection = this.randomizeDirection();  // Initialize random direction
-    this.direction = "";
+    this.direction = this.randomizeDirection();
     this.currentFrameX = 1;
     this.lastFrameTime = 0;
     this.frameCount = 10;
     this.frameDuration = 70;
+    this.range = range;
     this.startAnimation();
 
   }
@@ -243,14 +281,10 @@ class Ghost {
 
  hitwall(){
     return (
-      map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
-      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor(this.x/blockSize)] == 1 ||
-      map[Math.floor(this.y /blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 ||
-      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 
-      // ||
-      // this.x + this.width >= canvas.width || 
-      // this.y <= 0 || 
-      // this.y + this.height >= canvas.height
+      map[Math.floor(this.y/blockSize)][Math.floor(this.x/blockSize)] == 1 || // top left corner
+      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor(this.x/blockSize)] == 1 || //bottom left corner
+      map[Math.floor(this.y /blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 || //top right
+      map[Math.floor((this.y + blockSize - 0.1)/blockSize)][Math.floor((this.x + blockSize - 0.1)/blockSize)] == 1 //bottom right
     );
   }
 
@@ -263,45 +297,130 @@ class Ghost {
       if (this.hitwall()) {
           this.pauseMoving();
           this.direction = tempDirection;
-          
       } 
      
   }
 
-  moveForward(){
-    switch(this.direction){
-      case "ArrowUp":
-        this.y -= speed/2;
-        break;
-      case "ArrowDown":
-        this.y += speed/2;
-        break;
-      case "ArrowLeft":
-        this.x -= speed/2;
-        break;
-      case "ArrowRight":
-        this.x += speed/2;
-        break;
-    }
-  }
+  moveForward() {
+ // Only move if there's no wall
+        switch (this.direction) {
+            case "ArrowUp":
+                this.y -= speed / 2;
+                break;
+            case "ArrowDown":
+                this.y += speed / 2;
+                break;
+            case "ArrowLeft":
+                this.x -= speed / 2;
+                break;
+            case "ArrowRight":
+                this.x += speed / 2;
+                break;
+        }
+
+        // Handle screen wrap-around
+        if (this.x < 0) {
+          this.x = canvas.width - 4;
+        } else if (this.x > canvas.width) {
+            this.x = 0;
+        }
+}
+
 
   pauseMoving() {
     switch(this.direction){
       case "ArrowUp":
-        this.y += speed;
+        this.y += speed/2;
         break;
       case "ArrowDown":
-        this.y -= speed;
+        this.y -= speed/2;
         break;
       case "ArrowLeft":
-        this.x += speed;
+        this.x += speed/2;
         break;
       case "ArrowRight":
-        this.x -= speed;
+        this.x -= speed/2;
         break;
     } 
-    this.nextDirection = this.randomizeDirection();
+  
   }
+  isInRange(){
+    let xDistance = Math.abs(parseInt(pacman.x/blockSize) - parseInt(this.x/blockSize));
+    let yDistance = Math.abs(parseInt(pacman.y/blockSize) - parseInt(this.y/blockSize));
+
+    return Math.sqrt(xDistance*xDistance + yDistance*yDistance) <= this.range
+  }
+
+  bfs(map, targetX, targetY) {
+    let targetx = parseInt(targetX / blockSize);
+    let targety = parseInt(targetY / blockSize);
+
+    let mp = map.map(row => row.slice());  // Deep copy of the map
+
+    let queue = [{
+        x: parseInt(this.x / blockSize),
+        y: parseInt(this.y / blockSize),
+        moves: [],
+    }];
+
+    while (queue.length > 0) {
+        let popped = queue.shift();
+
+        // If the current position matches the target position, return the first move in the sequence
+        if (popped.x == targetx && popped.y == targety) {
+            return popped.moves[0];  // First move towards the target
+        } else {
+            // Mark the current cell as visited
+            mp[popped.y][popped.x] = 1;
+
+            // Add the valid neighboring cells to the queue
+            let neighborCells = this.addAdjacentCells(popped, mp);
+            for (let i = 0; i < neighborCells.length; i++) {
+                queue.push(neighborCells[i]);
+            }
+        }
+    }
+
+    return null;  // If no path is found, return null (or handle as needed)
+}
+
+
+addAdjacentCells(popped, mp) {
+    let queue = [];
+    let numRows = mp.length;
+    let numColumns = mp[0].length;
+
+    // Check left movement (x - 1)
+    if (popped.x - 1 >= 0 && mp[popped.y][popped.x - 1] != 1) {
+        let tempMoves = popped.moves.slice();
+        tempMoves.push("ArrowLeft");
+        queue.push({ x: popped.x - 1, y: popped.y, moves: tempMoves });
+    }
+
+    // Check right movement (x + 1)
+    if (popped.x + 1 < numColumns && mp[popped.y][popped.x + 1] != 1) {
+        let tempMoves = popped.moves.slice();
+        tempMoves.push("ArrowRight");
+        queue.push({ x: popped.x + 1, y: popped.y, moves: tempMoves });
+    }
+
+    // Check up movement (y - 1)
+    if (popped.y - 1 >= 0 && mp[popped.y - 1][popped.x] != 1) {
+        let tempMoves = popped.moves.slice();
+        tempMoves.push("ArrowUp");
+        queue.push({ x: popped.x, y: popped.y - 1, moves: tempMoves });
+    }
+
+    // Check down movement (y + 1)
+    if (popped.y + 1 < numRows && mp[popped.y + 1][popped.x] != 1) {
+        let tempMoves = popped.moves.slice();
+        tempMoves.push("ArrowDown");
+        queue.push({ x: popped.x, y: popped.y + 1, moves: tempMoves });
+    }
+
+    return queue;
+}
+
 
   draw(){
     ctx.save();
@@ -329,18 +448,48 @@ class Ghost {
 }
 }
 
-points = 0;
-const pacman = new Pacman(blockSize, blockSize, blockSize, blockSize);
-const ghosts = [new Ghost(280,280,70,70, 'blue'), new Ghost(280,280,70,70, 'yellow'), new Ghost(280,280,70,70, 'green'), new Ghost(280,280,70,70, 'purple'), new Ghost(280,280,70,70, 'pink')];
+
+
+function displayMessage(message){
+    ctx.save();
+    ctx.font = "bold 40px 'emulogic'";
+    ctx.fillStyle= "yellow";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle"; 
+
+    let messageX = canvas.width/2;
+    let messageY = canvas.height/2 - 200;
+
+    ctx.strokeStyle = "black";
+    ctx.lineWidth = 2;
+    ctx.strokeText(`${message}`, messageX, messageY);
+    ctx.fillText(`${message}`, messageX, messageY);
+    ctx.restore()
+    return;
+}
+
+
 function animate() {
+
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
   drawMap();
   drawFood();
+
+  if (!gameStarted) {
+    displayMessage("Ready!");
+    pacman.draw();
+    ghosts.forEach(ghost => ghost.draw());
+    gameStarted = true;
+    setTimeout(() => {
+      animate(); // Resume the game loop after delay
+    }, 2000);
+
+    return; // Exit the function to pause the game until timeout
+  }
+  
   pacman.changeDirectionIfPossible();
   pacman.moveForward();
   pacman.eat();
-  
-  
   
   document.getElementById('points').textContent = `POINTS:  ${points}`;
   if (pacman.hitwall()){
@@ -351,74 +500,150 @@ function animate() {
     // Pause Pac-Man and ghosts
     pacman.pauseMoving();
     ghosts.forEach(ghost => ghost.pauseMoving());
-  
-    // Optionally show a game-over message or a collision message
-    ctx.save();
-    ctx.font = "30px Arial";
-    ctx.fillStyle = "red";
-    ctx.textAlign = "center";
-    ctx.fillText("Pac-Man Hit a Ghost!", canvas.width / 2, canvas.height / 2);
-    ctx.restore();
-  
     // Pause the game and reset after 2 seconds
+    lives--;
+    updateLives();
+    displayMessage("HIT!");
+    
     setTimeout(() => {
-      // Clear any displayed message
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-      // Reset positions and state
-      reset();
-  
-      // Resume the game animation
-      animate();
+    // Clear any displayed message
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Reset positions and state
+    reset();
+    // Resume the game animation
+    animate();
     }, 2000); // 2000 milliseconds = 2 seconds
   
     return; // Exit the function to avoid further animation until resume
   }
+  if (lives === 0) {
+    displayMessage("Game Over");
+    cancelAnimationFrame(animationId);  // Stop the game loop
+    
+    // Give a delay before resetting to show the message
+    setTimeout(() => {
+        restartGame();  // Reset the game state
+    }, 2000);  // 2 seconds delay for displaying the "Game Over" message
+    
+    return;  // Exit the function to stop further animation
+}
+  if (pacman.isfinishedEating()) {
+    displayMessage("You won!")
+    cancelAnimationFrame(animationId);
+    setTimeout(() => {
+      restartGame();  // Reset the game state
+  }, 2000);  // 2 seconds delay for displaying the "Game Over" message
   
-  if (pacman.isfinishEating()) {
-  while (ghosts.length > 0) {
-    ghosts.pop();
-  }
+  return;  // Exit the function to stop further animation
+
 }
   
   pacman.draw();
   ghosts.forEach(ghost => {
-    ghost.changeDirectionIfPossible(); // Check if the ghost can change direction
-    ghost.moveForward();               // Move the ghost in its current direction
-    
-    if (ghost.hitwall()) {
-      ghost.pauseMoving();              // Pause and choose a new direction if a wall is hit
-    }
-    
-    ghost.draw();                       // Draw the ghost on the canvas
-  });
+  if(bfsButtonValue){
+    if (!ghost.isInRange()) {
+      // Make sure to randomize a direction
+      ghost.changeDirectionIfPossible();
+      ghost.moveForward();
+      if (ghost.hitwall()) {
+          ghost.pauseMoving();
+          ghost.nextDirection = ghost.randomizeDirection(); 
+      }
+  } else {
+      // If in range, use BFS to chase Pac-Man
+      let bfsDirection = ghost.bfs(map, pacman.x, pacman.y);
+      if (bfsDirection) {
+          ghost.nextDirection = bfsDirection;
+          console.log(ghost.nextDirection);
+          ghost.changeDirectionIfPossible();
+          ghost.moveForward();
+          if (ghost.hitwall()) {
+              ghost.pauseMoving();
+          }
+      }
+  }
+} else{
+//    // Make sure to randomize a direction
+   ghost.changeDirectionIfPossible();
+   ghost.moveForward();
+   if (ghost.hitwall()) {
+       ghost.pauseMoving();
+       ghost.nextDirection = ghost.randomizeDirection(); 
+}
+ }
+ ghost.draw();
   
-  requestAnimationFrame(animate);
+});
+  
+  animationId = requestAnimationFrame(animate);
 }
 
 
-
-
-
-
-
-
-
-
-
 function reset(){
-  
-  
   pacman.x = 70;
   pacman.y = 70;
   pacman.direction = "";
   pacman.nextDirection = "";
+  pacman.direct = "";
 
-  
-  for (const ghost of ghosts){
-    ghost.x = 280;
+  ghosts.forEach((ghost, index) => {
+    ghost.x = 280; // Or initial spawn position for ghosts
     ghost.y = 280;
-  }
+    ghost.direction = ghost.randomizeDirection(); // Reset ghost movement direction
+    ghost.nextDirection = ghost.randomizeDirection();
+    range = 6 + index;
+  });
+}
+
+function restartGame(){
+  cancelAnimationFrame(animationId);
+  pacman.x = 70;
+  pacman.y = 70;
+  pacman.direction = "";
+  pacman.nextDirection = "";
+  pacman.direct = "";
+
+  // Reset ghost positions
+  ghosts.forEach((ghost, index) => {
+    ghost.x = 280; // Or initial spawn position for ghosts
+    ghost.y = 280;
+    ghost.direction = ghost.randomizeDirection(); // Reset ghost movement direction
+    ghost.nextDirection = ghost.randomizeDirection();
+    range = 6 + index;
+  });
+
+  // Reset points and lives
+  points = 1;
+  lives = 3;
+  updateLives();
+  // Reset map to its initial state (replace food-eaten spaces)
+  map = [
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    [1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+    [1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1, 2, 1, 5, 5, 5, 5, 5, 5, 5, 1, 2, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+    [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2],
+    [1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+    [0, 0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1],
+    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+    [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+    [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 2, 1, 1],
+    [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+    [1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1],
+    [1, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+];
+  gameStarted = false;
+  startGame();
 }
 
 let map = [
@@ -430,7 +655,7 @@ let map = [
     [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
     [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
     [1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0],
+    [0, 0, 0, 0, 1, 2, 1, 5, 5, 5, 5, 5, 5, 5, 1, 2, 1, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
     [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2],
     [1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
@@ -450,17 +675,26 @@ let map = [
 
 
 
-
+function updateLives() {
+  const livesElement = document.getElementById('hearts');
+  let hearts = '❤️ '.repeat(lives);  // Repeat the heart emoji based on lives
+  livesElement.innerHTML = `${hearts}`;
+}
 function drawFood() {
   map.forEach(( row, y) => {
     row.forEach(( cell , x) => {
       if (cell == 2) {
          // Set a color for the food
-        ctx.fillRect(x * blockSize + 20, y * blockSize + 20, blockSize/3, blockSize/3);
+        ctx.save();
+        ctx.fillStyle ="blue";
+        ctx.fillRect(x * blockSize + 25, y * blockSize + 25, blockSize/5, blockSize/5);
+        ctx.restore();
       } 
       if(cell == 3){
-        ctx.fillStyle = "black";
-        ctx.fillRect(x * blockSize + 20, y * blockSize + 20, blockSize/2, blockSize/2);
+        ctx.save();
+        ctx.fillStyle = "blue";
+        ctx.fillRect(x * blockSize + 30, y * blockSize + 30, blockSize/3, blockSize/3);
+        ctx.restore();
       }
     });
   });
@@ -481,6 +715,71 @@ map.forEach((row, y)=> {
 };
 
 
-requestAnimationFrame(animate);
+function startGame() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
+  drawMap();
+  drawFood();
+  displayMessage("Start Game");
 
-};
+  const messageX = canvas.width / 2;
+  const messageY = canvas.height / 2 - 200;
+  const clickableAreaWidth = 300;  // Enlarged clickable area width
+  const clickableAreaHeight = 100;  // Enlarged clickable area height
+
+  // Remove any existing click listener before adding a new one
+  canvas.removeEventListener('click', handleStartClick);
+  canvas.addEventListener('click', handleStartClick);
+}
+
+// Separate the event handler function
+function handleStartClick(event) {
+  const rect = canvas.getBoundingClientRect();
+  const x = event.clientX - rect.left;
+  const y = event.clientY - rect.top;
+
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const scaledX = x * scaleX;
+  const scaledY = y * scaleY;
+
+  const messageX = canvas.width / 2;
+  const messageY = canvas.height / 2 - 200;
+  const clickableAreaWidth = 300;
+  const clickableAreaHeight = 100;
+
+  // Check if the click is within the enlarged "Start" message area
+  if (
+      scaledX >= messageX - clickableAreaWidth / 2 &&
+      scaledX <= messageX + clickableAreaWidth / 2 &&
+      scaledY >= messageY - clickableAreaHeight / 2 &&
+      scaledY <= messageY + clickableAreaHeight / 2
+  ) {
+      animate();  // Start the game when the area is clicked
+  }
+}
+
+
+
+
+
+  let lives = 3;
+  let points = 0;
+  let gameStarted = false;
+  let ghosts = [];
+  const pacman = new Pacman(560, 560, blockSize, blockSize);
+  let ghostCount = 5;
+  for (let i = 0; i < ghostCount; i++) {
+    let range = 6 + i;  // Vary the range for each ghost (starting from 6)
+    
+    let newGhost = new Ghost(
+        280,         // X position
+        280,         // Y position
+        70,     // Width of the ghost
+        70,     // Height of the ghost
+        range             // Range (detection radius) increases for each ghost
+    );
+    
+    ghosts.push(newGhost);  // Add the ghost to the array
+}
+  startGame();
+
