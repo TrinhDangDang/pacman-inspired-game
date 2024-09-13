@@ -16,6 +16,7 @@ const touchGhostSound = document.getElementById("touchGhost");
 
 let randomButtonValue = false;
 let bfsButtonValue = false;
+backgroundSound.volume = 0.4;
 
 bfsMovementButton.addEventListener("click", function(){
   displayalgorithm.textContent = "You are currently selecting Breadth First Search movement for Patrick to chase after SpongeBob";
@@ -561,13 +562,13 @@ function animate() {
   if (lives === 0) {
     displayMessage("Game Over");
     gameOverSound.play();
-    cancelAnimationFrame(animationId);  // Stop the game loop
+     // Stop the game loop
     
     // Give a delay before resetting to show the message
     setTimeout(() => {
         restartGame();  // Reset the game state
     }, 2000);  // 2 seconds delay for displaying the "Game Over" message
-    
+    cancelAnimationFrame(animationId); 
     return;  // Exit the function to stop further animation
 }
   if (pacman.isfinishedEating()) {
@@ -652,8 +653,8 @@ function restartGame(){
     ghost.nextDirection = ghost.randomizeDirection();
     range = 6 + index;
   });
-  let randomButtonValue = false;
-  let bfsButtonValue = false;
+  randomButtonValue = false;
+  bfsButtonValue = false;
 
   // Reset points and lives
   points = 1;
