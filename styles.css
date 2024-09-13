@@ -1,6 +1,10 @@
+html{
+  height: 100vh;
+}
+
 body{
   display: flex;
-  height: 100vh;
+  height: 98vh;
   align-items: center;
   justify-content: center;
   flex-direction: column;
@@ -10,7 +14,7 @@ body{
 	color: #5C6AC4;
 }
 #canvas {
-  width: 70vh;  /* Use viewport width to control canvas size */ /* 4:3 aspect ratio */
+  width: 70%;  /* Use viewport width to control canvas size */ /* 4:3 aspect ratio */
   
 }
 

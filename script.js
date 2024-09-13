@@ -241,51 +241,43 @@ eat() {
 
 
 
+// Keydown event for arrow keys
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 'ArrowUp':
-      event.preventDefault();
       pacman.nextDirection = 'ArrowUp';
       break;
     case 'ArrowDown':
-      event.preventDefault();
       pacman.nextDirection = 'ArrowDown';
       break;
     case 'ArrowLeft':
-      event.preventDefault();
       pacman.nextDirection = 'ArrowLeft';
       break;
     case 'ArrowRight':
-      event.preventDefault();
       pacman.nextDirection = 'ArrowRight';
       break;
   }
 });
 
-
 // Variables to store touch start and end positions
 let touchStartX = 0;
 let touchStartY = 0;
-let touchEndX = 0;
-let touchEndY = 0;
 
 // Touchscreen input for Pac-Man
 document.addEventListener('touchstart', function(e) {
-  e.preventDefault(); // Prevent default scrolling behavior
   touchStartX = e.changedTouches[0].screenX;
   touchStartY = e.changedTouches[0].screenY;
-}, { passive: false });
+}, { passive: true });
 
 document.addEventListener('touchend', function(e) {
-  e.preventDefault(); // Prevent default scrolling behavior
-  touchEndX = e.changedTouches[0].screenX;
-  touchEndY = e.changedTouches[0].screenY;
-  handleSwipe();
-}, { passive: false });
+  const touchEndX = e.changedTouches[0].screenX;
+  const touchEndY = e.changedTouches[0].screenY;
+  handleSwipe(touchStartX, touchStartY, touchEndX, touchEndY);
+}, { passive: true });
 
-function handleSwipe() {
-  const diffX = touchEndX - touchStartX;
-  const diffY = touchEndY - touchStartY;
+function handleSwipe(startX, startY, endX, endY) {
+  const diffX = endX - startX;
+  const diffY = endY - startY;
 
   // Determine if the swipe is more horizontal or vertical
   if (Math.abs(diffX) > Math.abs(diffY)) {
@@ -304,6 +296,7 @@ function handleSwipe() {
     }
   }
 }
+
 class Ghost {
   constructor(x, y, width, height, range){
     this.x = x;
