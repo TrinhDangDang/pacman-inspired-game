@@ -244,24 +244,66 @@ eat() {
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 'ArrowUp':
-      // event.preventDefault();
+      event.preventDefault();
       pacman.nextDirection = 'ArrowUp';
       break;
     case 'ArrowDown':
-      // event.preventDefault();
+      event.preventDefault();
       pacman.nextDirection = 'ArrowDown';
       break;
     case 'ArrowLeft':
-      // event.preventDefault();
+      event.preventDefault();
       pacman.nextDirection = 'ArrowLeft';
       break;
     case 'ArrowRight':
-      // event.preventDefault();
+      event.preventDefault();
       pacman.nextDirection = 'ArrowRight';
       break;
   }
 });
 
+
+// Variables to store touch start and end positions
+let touchStartX = 0;
+let touchStartY = 0;
+let touchEndX = 0;
+let touchEndY = 0;
+
+// Touchscreen input for Pac-Man
+document.addEventListener('touchstart', function(e) {
+  e.preventDefault(); // Prevent default scrolling behavior
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, { passive: false });
+
+document.addEventListener('touchend', function(e) {
+  e.preventDefault(); // Prevent default scrolling behavior
+  touchEndX = e.changedTouches[0].screenX;
+  touchEndY = e.changedTouches[0].screenY;
+  handleSwipe();
+}, { passive: false });
+
+function handleSwipe() {
+  const diffX = touchEndX - touchStartX;
+  const diffY = touchEndY - touchStartY;
+
+  // Determine if the swipe is more horizontal or vertical
+  if (Math.abs(diffX) > Math.abs(diffY)) {
+    // Horizontal swipe
+    if (diffX > 0) {
+      pacman.nextDirection = 'ArrowRight'; // Swipe right
+    } else {
+      pacman.nextDirection = 'ArrowLeft';  // Swipe left
+    }
+  } else {
+    // Vertical swipe
+    if (diffY > 0) {
+      pacman.nextDirection = 'ArrowDown';  // Swipe down
+    } else {
+      pacman.nextDirection = 'ArrowUp';    // Swipe up
+    }
+  }
+}
 class Ghost {
   constructor(x, y, width, height, range){
     this.x = x;
