@@ -8,6 +8,11 @@ const patrickFrames = document.getElementById("patrick");
 const bfsMovementButton = document.getElementById("bfs-movement-when-in-range");
 const randomMovementButton = document.getElementById("random-movement"); // Make sure this ID matches your HTML
 const displayalgorithm = document.getElementById("display-message"); 
+const eatSound = document.getElementById("eatsound");
+const backgroundSound = document.getElementById("backgroundsound");
+const gameOverSound = document.getElementById("gameOver");
+const touchGhostSound = document.getElementById("touchGhost");
+
 
 let randomButtonValue = false;
 let bfsButtonValue = false;
@@ -211,6 +216,7 @@ eat() {
   
   // Check if the current position contains food (2) or collectible (3)
   if (map[row][col] == 2) {
+    eatSound.play();
     points++;
     map[row][col] = 4;  // Mark as eaten
       // Increment points
@@ -470,7 +476,7 @@ function displayMessage(message){
 
 
 function animate() {
-
+  backgroundSound.play();
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
   drawMap();
   drawFood();
@@ -498,6 +504,7 @@ function animate() {
   }
   if (pacman.hitGhost()) {
     // Pause Pac-Man and ghosts
+    touchGhostSound.play();
     pacman.pauseMoving();
     ghosts.forEach(ghost => ghost.pauseMoving());
     // Pause the game and reset after 2 seconds
@@ -518,6 +525,7 @@ function animate() {
   }
   if (lives === 0) {
     displayMessage("Game Over");
+    gameOverSound.play();
     cancelAnimationFrame(animationId);  // Stop the game loop
     
     // Give a delay before resetting to show the message
@@ -716,6 +724,7 @@ map.forEach((row, y)=> {
 
 
 function startGame() {
+  
   ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
   drawMap();
   drawFood();
@@ -754,6 +763,7 @@ function handleStartClick(event) {
       scaledY >= messageY - clickableAreaHeight / 2 &&
       scaledY <= messageY + clickableAreaHeight / 2
   ) {
+    
       animate();  // Start the game when the area is clicked
   }
 }
