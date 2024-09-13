@@ -10,7 +10,7 @@ const randomMovementButton = document.getElementById("random-movement"); // Make
 const displayalgorithm = document.getElementById("display-message"); 
 const eatSound = document.getElementById("eatsound");
 const backgroundSound = document.getElementById("backgroundsound");
-const gameOverSound = document.getElementById("gameOver");
+const gameOverSound = document.getElementById("gameOverSound");
 const touchGhostSound = document.getElementById("touchGhost");
 
 
@@ -563,12 +563,12 @@ function animate() {
     displayMessage("Game Over");
     gameOverSound.play();
      // Stop the game loop
-    
+     cancelAnimationFrame(animationId); 
     // Give a delay before resetting to show the message
     setTimeout(() => {
         restartGame();  // Reset the game state
     }, 2000);  // 2 seconds delay for displaying the "Game Over" message
-    cancelAnimationFrame(animationId); 
+    
     return;  // Exit the function to stop further animation
 }
   if (pacman.isfinishedEating()) {
