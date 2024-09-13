@@ -1,22 +1,21 @@
 body{
-  padding: 25px;
   display: flex;
+  height: 100vh;
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  overflow: hidden;
 }
 .title {
 	color: #5C6AC4;
 }
 #canvas {
-  border: 2px solid black;
-  width: 700px;
-  height: 700px; /*this width and height set the size of the canvas on the screen, how big the canvas will be, the width and height properties of the canvas inside the html file is different, that one set the pixel density, i think*/
-  margin: auto;
+  width: 70vh;  /* Use viewport width to control canvas size */ /* 4:3 aspect ratio */
+  
 }
 
 #output-and-console{
-  margin-top: 50px;
+  margin-top: 1vh;
   width: auto;
   height: auto;
 
@@ -50,7 +49,7 @@ body{
 }
 
 #info-box{
-  width: 700px;
+  width: 70vh;
   display:flex;
   justify-content: space-between;
 }

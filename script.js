@@ -244,19 +244,19 @@ eat() {
 window.addEventListener('keydown', (event) => {
   switch (event.key) {
     case 'ArrowUp':
-      event.preventDefault();
+      // event.preventDefault();
       pacman.nextDirection = 'ArrowUp';
       break;
     case 'ArrowDown':
-      event.preventDefault();
+      // event.preventDefault();
       pacman.nextDirection = 'ArrowDown';
       break;
     case 'ArrowLeft':
-      event.preventDefault();
+      // event.preventDefault();
       pacman.nextDirection = 'ArrowLeft';
       break;
     case 'ArrowRight':
-      event.preventDefault();
+      // event.preventDefault();
       pacman.nextDirection = 'ArrowRight';
       break;
   }
@@ -548,14 +548,13 @@ function animate() {
   
   pacman.draw();
   ghosts.forEach(ghost => {
-  if(bfsButtonValue){
+  if(bfsButtonValue){ //if Breadth First search button is selected, the ghosts uses breadthfirstsearch to chase after pacman when in range
     if (!ghost.isInRange()) {
-      // Make sure to randomize a direction
       ghost.changeDirectionIfPossible();
       ghost.moveForward();
       if (ghost.hitwall()) {
           ghost.pauseMoving();
-          ghost.nextDirection = ghost.randomizeDirection(); 
+          ghost.nextDirection = ghost.randomizeDirection(); //when the ghost hit wall, randomize direction
       }
   } else {
       // If in range, use BFS to chase Pac-Man
@@ -570,8 +569,7 @@ function animate() {
           }
       }
   }
-} else{
-//    // Make sure to randomize a direction
+} else{ //default movement for ghosts is random
    ghost.changeDirectionIfPossible();
    ghost.moveForward();
    if (ghost.hitwall()) {
