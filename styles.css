@@ -8,6 +8,7 @@ html, body{
   flex-direction: column;
   box-sizing: border-box;
   padding: 10px;
+  background-image: url("image.png");
 }
 .title {
 	color: #5C6AC4;
@@ -20,39 +21,37 @@ html, body{
   margin-top: 1vh;
   width: auto;
   height: auto;
+  font-family: 'emulogic';
+  color: black;
+  font-size: 13px;
+  text-align: center;
 
 }
 
 #buttons {
   display: flex;
-  justify-content: space-between;
-
+  align-items: center;
+  justify-content: center;
+}
+#buttons button {
+  margin: 10px;
 }
 #points{
   font-family: 'emulogic';
   font-style: bold;
-  text-shadow:
-  -2px -2px 0 #000, /* Top-left shadow */
-  2px -2px 0 #000,  /* Top-right shadow */
-  -2px 2px 0 #000,  /* Bottom-left shadow */
-  2px 2px 0 #000; 
   color: yellow;
 }
 
 #lives {
   font-family: 'emulogic';
   font-style: bold;
-  text-shadow:
-  -2px -2px 0 #000, /* Top-left shadow */
-  2px -2px 0 #000,  /* Top-right shadow */
-  -2px 2px 0 #000,  /* Bottom-left shadow */
-  2px 2px 0 #000; 
   color: yellow;
 }
 
 #info-box{
   width: min(70vh, 90vw); /*tells browser to take the smaller of the two values, when the browser has greater height than width, the width of the info box is 90vw and if the browser's width is larger than the browser height, then 70vw will be picked*/
   display:flex;
+  font-size: medium;
   justify-content: space-between;
   align-items: center;
 }

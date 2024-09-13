@@ -59,7 +59,7 @@ class Pacman {
   }
   draw(){
     ctx.save()
-    ctx.drawImage(spongebobFrames, (this.currentFrameX - 1) * 180 + this.animationStartX, (this.currentFrameY - 1) * 156 + this.animationStartY , 162, 138,  this.x - 90, this.y - 90, 250, 230 );
+    ctx.drawImage(spongebobFrames, (this.currentFrameX - 1) * 180 + this.animationStartX, (this.currentFrameY - 1) * 156 + this.animationStartY , 162, 138,  this.x - blockSize -30, this.y - blockSize -30, 250, 230 );
     ctx.restore()
   }
 
@@ -493,7 +493,7 @@ addAdjacentCells(popped, mp) {
 
 function displayMessage(message){
     ctx.save();
-    ctx.font = "bold 40px 'emulogic'";
+    ctx.font = "bold 45px 'emulogic'";
     ctx.fillStyle= "yellow";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle"; 
@@ -621,8 +621,8 @@ function animate() {
 
 
 function reset(){
-  pacman.x = 70;
-  pacman.y = 70;
+  pacman.x = 700;
+  pacman.y = 700;
   pacman.direction = "";
   pacman.nextDirection = "";
   pacman.direct = "";
@@ -638,12 +638,12 @@ function reset(){
 
 function restartGame(){
   cancelAnimationFrame(animationId);
-  pacman.x = 70;
-  pacman.y = 70;
+  pacman.x = 700;
+  pacman.y = 700;
   pacman.direction = "";
   pacman.nextDirection = "";
   pacman.direct = "";
-
+  displayalgorithm.textContent = "Select an algorithm that the Patrick will use to catch up with SpongeBob";
   // Reset ghost positions
   ghosts.forEach((ghost, index) => {
     ghost.x = 280; // Or initial spawn position for ghosts
@@ -652,6 +652,8 @@ function restartGame(){
     ghost.nextDirection = ghost.randomizeDirection();
     range = 6 + index;
   });
+  let randomButtonValue = false;
+  let bfsButtonValue = false;
 
   // Reset points and lives
   points = 1;
@@ -809,7 +811,7 @@ function handleStartClick(event) {
   let points = 0;
   let gameStarted = false;
   let ghosts = [];
-  const pacman = new Pacman(560, 560, blockSize, blockSize);
+  const pacman = new Pacman(700, 700, blockSize, blockSize);
   let ghostCount = 5;
   for (let i = 0; i < ghostCount; i++) {
     let range = 6 + i;  // Vary the range for each ghost (starting from 6)
