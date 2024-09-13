@@ -1,19 +1,19 @@
 
-
-body{
+html, body{
   display: flex;
   height: 100vh;
+  width: 100vw;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  overflow: hidden;
+  box-sizing: border-box;
+  padding: 10px;
 }
 .title {
 	color: #5C6AC4;
 }
 #canvas {
-  width: 70vh;  /* Use viewport width to control canvas size */ /* 4:3 aspect ratio */
-  
+  width: min(70vh, 90vw);  
 }
 
 #output-and-console{
@@ -51,9 +51,10 @@ body{
 }
 
 #info-box{
-  width: 70vh;
+  width: min(70vh, 90vw); /*tells browser to take the smaller of the two values, when the browser has greater height than width, the width of the info box is 90vw and if the browser's width is larger than the browser height, then 70vw will be picked*/
   display:flex;
   justify-content: space-between;
+  align-items: center;
 }
 @font-face {
   font-family: 'emulogic';
