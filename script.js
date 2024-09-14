@@ -222,22 +222,24 @@ eat() {
     map[row][col] = 4;  // Mark as eaten
       // Increment points
   } 
-  if(map[row][col]== 3){
+  if(map[row][col] == 3){
+    eatSound.play();
     points = points + 2;
     map[row][col] = 4;
     
   }
 }
-  isfinishedEating() {
-    for(let i = 0; i < map.length; i++){
-      for(let j = 0; j < map[0].length; j++){
-        if(map[i][j] == 2){
-          return false;
-        }
+isfinishedEating() {
+  let number = 0;
+  for(let i = 0; i < map.length; i++){
+    for(let j = 0; j < map[0].length; j++){
+      if(map[i][j] == 2 || map[i][j] == 3 ){
+        return false;
       }
     }
-    return true;
   }
+  return true;
+}
 }
 
 
