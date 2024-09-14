@@ -12,7 +12,7 @@ const eatSound = document.getElementById("eatsound");
 const backgroundSound = document.getElementById("backgroundsound");
 const gameOverSound = document.getElementById("gameOverSound");
 const touchGhostSound = document.getElementById("touchGhost");
-
+const winSound = document.getElementById("winSound");
 
 let randomButtonValue = false;
 let bfsButtonValue = false;
@@ -574,6 +574,7 @@ function animate() {
     return;  // Exit the function to stop further animation
 }
   if (pacman.isfinishedEating()) {
+    winSound.play();
     displayMessage("You won!")
     cancelAnimationFrame(animationId);
     setTimeout(() => {
