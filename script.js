@@ -7,6 +7,7 @@ const spongebobFrames = document.getElementById("spongebob");
 const patrickFrames = document.getElementById("patrick");
 const bfsMovementButton = document.getElementById("bfs-movement-when-in-range");
 const randomMovementButton = document.getElementById("random-movement"); // Make sure this ID matches your HTML
+// const dfsMovementButton = document.getElementById("dfs-movement")
 const displayalgorithm = document.getElementById("display-message"); 
 const eatSound = document.getElementById("eatsound");
 const backgroundSound = document.getElementById("backgroundsound");
@@ -14,21 +15,31 @@ const gameOverSound = document.getElementById("gameOverSound");
 const touchGhostSound = document.getElementById("touchGhost");
 const winSound = document.getElementById("winSound");
 
-let randomButtonValue = false;
+let randomButtonValue = true;
 let bfsButtonValue = false;
+// let dfsButtonValue = false;
 backgroundSound.volume = 0.4;
 
 bfsMovementButton.addEventListener("click", function(){
   displayalgorithm.textContent = "You are currently selecting Breadth First Search movement for Patrick to chase after SpongeBob";
   bfsButtonValue = true;
   randomButtonValue = false;
+  // dfsButtonValue = false;
 });
 
 randomMovementButton.addEventListener("click", function(){
   displayalgorithm.textContent = "You are currently selecting Random Movement, Patrick will move randomly until he reaches SpongeBob";
   randomButtonValue = true;
   bfsButtonValue = false;
+  // dfsButtonValue = false;
 });
+
+// dfsMovementButton.addEventListener("click", () => {
+//   displayalgorithm.textContent = "hello"
+//   randomButtonValue = false;
+//   bfsButtonValue = false;
+//   dfsButtonValue = true;
+// } )
 
 let animationId;
 
@@ -54,7 +65,6 @@ class Pacman {
     this.animationStartY = 46;
     this.lastFrameTime = 0;
     this.frameDuration = 70;
-    this.startAnimation();
     this.direct = '';
    
   }
@@ -119,19 +129,13 @@ class Pacman {
     }
   }
 
-  startAnimation() {
-    const animate = (timestamp) => {
-        const deltaTime = timestamp - this.lastFrameTime;
-        if (deltaTime > this.frameDuration){
-          this.changeAnimation(); // Update the animation frame
-          this.lastFrameTime = timestamp;
-        }
-        
-        requestAnimationFrame(animate); // Loop the animation
-    };
-    this.lastFrameTime = performance.now(); //initialize the last frame time
-    requestAnimationFrame(animate); // Start the animation loop
-}
+ updateAnimation(timestamp){
+  const deltaTime = timestamp - this.lastFrameTime;
+  if (deltaTime > this.frameDuration) {
+    this.changeAnimation();
+    this.lastFrameTime = timestamp
+  }
+ }
   
 
   hitwall(){
@@ -230,7 +234,6 @@ eat() {
   }
 }
 isfinishedEating() {
-  let number = 0;
   for(let i = 0; i < map.length; i++){
     for(let j = 0; j < map[0].length; j++){
       if(map[i][j] == 2 || map[i][j] == 3 ){
@@ -313,7 +316,7 @@ class Ghost {
     this.frameCount = 10;
     this.frameDuration = 70;
     this.range = range;
-    this.startAnimation();
+    // this.startAnimation();
 
   }
 
@@ -394,6 +397,52 @@ class Ghost {
 
     return Math.sqrt(xDistance*xDistance + yDistance*yDistance) <= this.range
   }
+  // CANNOT FIGURE DEPTH FIRST SEARCH, IT DOESNT FIND THE SHORTEST PATH, RETURNING UP THEN DOWN , LEFT THEN RIGHT, AND THEN RECALCULATE THEN GET STUCKED.  SWITCHING TO DIJKSTRA ALGORITHM INSTEAD 
+  // dfs(map, targetX, targetY){
+  //   let targetx = parseInt(targetX / blockSize);
+  //   let targety = parseInt(targetY / blockSize);
+  //   let map1 = map.map(row => row.slice());
+
+  //   const stack = [{
+  //     x: parseInt(this.x / blockSize), //x is the column in grid because x goes from left to right in the canvas
+  //     y: parseInt(this.y / blockSize),// y is the row in grid, because y in canvas goes from top to bottom, very not intuitive but there are so much to fix
+  //     moves: [],
+  //   }]
+  //   // console.log("Starting Stack", [...stack])
+    
+  //   while (stack.length > 0) {
+  //     let topOfStack = stack.pop();
+  //     // console.log(topOfStack)
+  //     map1[topOfStack.y][topOfStack.x] = 9;
+  //     map1.forEach((row, y)=> {
+  //       row.forEach((cell, x)=> {
+  //         if(cell == 9){
+  //           ctx.fillStyle = "red"; 
+              
+  //             // Draw the main block of the wall
+  //             ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+  //         }
+  //       })
+  //     })
+  //     // Check if the target is reached
+  //     if (topOfStack.x == targetx && topOfStack.y == targety) {
+  //         // console.log("FOUND IT")
+  //         return topOfStack.moves[0]; // Return the first move towards the target
+  //     } else {
+  //       // Add the valid neighboring cells to the stack
+  //       let neighborCells = this.addAdjacentCellss(topOfStack, map1, targetX, targetY);
+  //       // console.log(neighborCells)
+  //       neighborCells.reverse()
+  //       for (let i = 0; i < neighborCells.length; i++) {
+  //         // console.log("adding cell:",neighborCells[i])
+  //         stack.push(neighborCells[i]);
+  //     }
+  //     // console.log("Updated Stack",[...stack])
+  //     } 
+  // }
+
+  // return null; 
+  // }
 
   bfs(map, targetX, targetY) {
     let targetx = parseInt(targetX / blockSize);
@@ -402,20 +451,29 @@ class Ghost {
     let mp = map.map(row => row.slice());  // Deep copy of the map
 
     let queue = [{
-        x: parseInt(this.x / blockSize),
-        y: parseInt(this.y / blockSize),
+        x: parseInt(this.x / blockSize), //x is the column in grid because x goes from left to right in the canvas
+        y: parseInt(this.y / blockSize),// y is the row in grid, because y in canvas goes from top to bottom, very not intuitive but there are so much to fix
         moves: [],
     }];
 
     while (queue.length > 0) {
         let popped = queue.shift();
-
+        mp.forEach((row, y)=> {
+        row.forEach((cell, x)=> {
+          if(cell == 9){
+            ctx.fillStyle = "red"; 
+              
+              // Draw the main block of the wall
+              ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+          }
+        })
+      })
         // If the current position matches the target position, return the first move in the sequence
-        if (popped.x == targetx && popped.y == targety) {
+        if (popped.x == targetx && popped.y == targety) { //the target is found 
             return popped.moves[0];  // First move towards the target
         } else {
             // Mark the current cell as visited
-            mp[popped.y][popped.x] = 1;
+            mp[popped.y][popped.x] = 9;
 
             // Add the valid neighboring cells to the queue
             let neighborCells = this.addAdjacentCells(popped, mp);
@@ -425,7 +483,7 @@ class Ghost {
         }
     }
 
-    return null;  // If no path is found, return null (or handle as needed)
+    return null;  
 }
 
 
@@ -434,36 +492,83 @@ addAdjacentCells(popped, mp) {
     let numRows = mp.length;
     let numColumns = mp[0].length;
 
+
+     // Check up movement (y - 1)
+     if (popped.y - 1 >= 0 && mp[popped.y - 1][popped.x] != 9 && mp[popped.y - 1][popped.x] != 1) {
+      let tempMoves = popped.moves.slice();
+      tempMoves.push("ArrowUp");
+      queue.push({ x: popped.x, y: popped.y - 1, moves: tempMoves });
+    }
+
+
+    // Check right movement (x + 1)
+    if (popped.x + 1 < numColumns && mp[popped.y][popped.x + 1] != 9 && mp[popped.y][popped.x + 1] != 1) {
+      let tempMoves = popped.moves.slice();
+      tempMoves.push("ArrowRight");
+      queue.push({ x: popped.x + 1, y: popped.y, moves: tempMoves });
+    }
+
+    // Check down movement (y + 1)
+    if (popped.y + 1 < numRows && mp[popped.y + 1][popped.x] != 9 && mp[popped.y + 1][popped.x] != 1) {
+      let tempMoves = popped.moves.slice();
+      tempMoves.push("ArrowDown");
+      queue.push({ x: popped.x, y: popped.y + 1, moves: tempMoves });
+    }
     // Check left movement (x - 1)
-    if (popped.x - 1 >= 0 && mp[popped.y][popped.x - 1] != 1) {
+    if (popped.x - 1 >= 0 && mp[popped.y][popped.x - 1] != 9 && mp[popped.y][popped.x - 1] != 1) {
         let tempMoves = popped.moves.slice();
         tempMoves.push("ArrowLeft");
         queue.push({ x: popped.x - 1, y: popped.y, moves: tempMoves });
     }
-
-    // Check right movement (x + 1)
-    if (popped.x + 1 < numColumns && mp[popped.y][popped.x + 1] != 1) {
-        let tempMoves = popped.moves.slice();
-        tempMoves.push("ArrowRight");
-        queue.push({ x: popped.x + 1, y: popped.y, moves: tempMoves });
-    }
-
-    // Check up movement (y - 1)
-    if (popped.y - 1 >= 0 && mp[popped.y - 1][popped.x] != 1) {
-        let tempMoves = popped.moves.slice();
-        tempMoves.push("ArrowUp");
-        queue.push({ x: popped.x, y: popped.y - 1, moves: tempMoves });
-    }
-
-    // Check down movement (y + 1)
-    if (popped.y + 1 < numRows && mp[popped.y + 1][popped.x] != 1) {
-        let tempMoves = popped.moves.slice();
-        tempMoves.push("ArrowDown");
-        queue.push({ x: popped.x, y: popped.y + 1, moves: tempMoves });
-    }
-
     return queue;
 }
+
+
+//MEANT TO ADD CELLS FOR DEPTH FIRST SEARCH BUT DEPTH FIRST SEARCH IS SCRATCHED OUT 
+// addAdjacentCellss(popped, mp, targetx, targety) {
+//   let queue = [];
+//   let numRows = mp.length;
+//   let numColumns = mp[0].length;
+
+
+//    // Check up movement (y - 1)
+//    if (popped.y - 1 >= 0 && mp[popped.y - 1][popped.x] != 9 && mp[popped.y - 1][popped.x] != 1) {
+//     let tempMoves = popped.moves.slice();
+//     tempMoves.push("ArrowUp");
+//     queue.push({ x: popped.x, y: popped.y - 1, moves: tempMoves });
+//   }
+
+
+//   // Check right movement (x + 1)
+//   if (popped.x + 1 < numColumns && mp[popped.y][popped.x + 1] != 9 && mp[popped.y][popped.x + 1] != 1) {
+//     let tempMoves = popped.moves.slice();
+//     tempMoves.push("ArrowRight");
+//     queue.push({ x: popped.x + 1, y: popped.y, moves: tempMoves });
+//   }
+
+//   // Check down movement (y + 1)
+//   if (popped.y + 1 < numRows && mp[popped.y + 1][popped.x] != 9 && mp[popped.y + 1][popped.x] != 1) {
+//     let tempMoves = popped.moves.slice();
+//     tempMoves.push("ArrowDown");
+//     queue.push({ x: popped.x, y: popped.y + 1, moves: tempMoves });
+//   }
+//   // Check left movement (x - 1)
+//   if (popped.x - 1 >= 0 && mp[popped.y][popped.x - 1] != 9 && mp[popped.y][popped.x - 1] != 1) {
+//       let tempMoves = popped.moves.slice();
+//       tempMoves.push("ArrowLeft");
+//       queue.push({ x: popped.x - 1, y: popped.y, moves: tempMoves });
+//   }
+
+//   // Calculate and store the heuristic for each neighbor
+//   queue.forEach(cell => {
+//     cell.distance = Math.abs(cell.x - targetx) + Math.abs(cell.y - targety);
+// });
+
+// // Sort neighbors by their Manhattan distance to the target
+// // If you want the closest neighbor to be explored first by DFS, you may sort ascending
+// queue.sort((a, b) => a.distance - b.distance);
+//   return queue;
+// }
 
 
   draw(){
@@ -477,19 +582,27 @@ addAdjacentCells(popped, mp) {
     
 }
 
-  startAnimation() {
-    const animate = (timestamp) => {
-        const deltaTime = timestamp - this.lastFrameTime;
-        if (deltaTime > this.frameDuration){
-          this.changeAnimation(); // Update the animation frame
-          this.lastFrameTime = timestamp;
-        }
-        
-        requestAnimationFrame(animate); // Loop the animation
-    };
-    this.lastFrameTime = performance.now(); //initialize the last frame time
-    requestAnimationFrame(animate); // Start the animation loop
-}
+  //   startAnimation() {
+  //     const animate = (timestamp) => {
+  //         const deltaTime = timestamp - this.lastFrameTime;
+  //         if (deltaTime > this.frameDuration){
+  //           this.changeAnimation(); // Update the animation frame
+  //           this.lastFrameTime = timestamp;
+  //         }
+          
+  //         requestAnimationFrame(animate); // Loop the animation
+  //     };
+  //     this.lastFrameTime = performance.now(); //initialize the last frame time
+  //     requestAnimationFrame(animate); // Start the animation loop
+  // }
+
+  updateAnimation(timestamp) {
+    const deltaTime = timestamp - this.lastFrameTime;
+    if (deltaTime > this.frameDuration) {
+      this.changeAnimation(); // Update the animation frame
+      this.lastFrameTime = timestamp;
+    }
+  }
 }
 
 
@@ -513,11 +626,13 @@ function displayMessage(message){
 }
 
 
-function animate() {
+function animate(timestamp) {  //main function that runs the game
   backgroundSound.play();
   ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear the canvas
   drawMap();
-  drawFood();
+  
+  pacman.updateAnimation(timestamp);
+  ghosts.forEach((ghost) => ghost.updateAnimation(timestamp));
 
   if (!gameStarted) {
     displayMessage("Ready!");
@@ -534,6 +649,7 @@ function animate() {
   pacman.changeDirectionIfPossible();
   pacman.moveForward();
   pacman.eat();
+  drawFood(); //move drawfood after eat() so the last piece of food is removed after eaten before winning message
   
   document.getElementById('points').textContent = `POINTS:  ${points}`;
   if (pacman.hitwall()){
@@ -580,11 +696,11 @@ function animate() {
     setTimeout(() => {
       restartGame();  // Reset the game state
   }, 2000);  // 2 seconds delay for displaying the "Game Over" message
-  
+ 
   return;  // Exit the function to stop further animation
 
 }
-  
+  // pacman.eat(); //put eat after checking if all the food are eaten to make sure that the last piece of food is not left behind, so food is drawn , if you eat the food before isfinishedEating, the game win is triggered before the last piece of food is removed, (you can also move drawfood down after eat)
   pacman.draw();
   ghosts.forEach(ghost => {
   if(bfsButtonValue){ //if Breadth First search button is selected, the ghosts uses breadthfirstsearch to chase after pacman when in range
@@ -598,9 +714,10 @@ function animate() {
   } else {
       // If in range, use BFS to chase Pac-Man
       let bfsDirection = ghost.bfs(map, pacman.x, pacman.y);
+      console.log(bfsDirection)
       if (bfsDirection) {
           ghost.nextDirection = bfsDirection;
-          console.log(ghost.nextDirection);
+          // console.log(ghost.nextDirection);
           ghost.changeDirectionIfPossible();
           ghost.moveForward();
           if (ghost.hitwall()) {
@@ -608,6 +725,28 @@ function animate() {
           }
       }
   }
+// } else if (dfsButtonValue) {
+//       if (!ghost.isInRange()) {
+//         ghost.changeDirectionIfPossible();
+//         ghost.moveForward();
+//         if (ghost.hitwall()) {
+//             ghost.pauseMoving();
+//             ghost.nextDirection = ghost.randomizeDirection(); //when the ghost hit wall, randomize direction
+//         }
+//     } 
+//       if(ghost.isInRange()){
+//         let dfsDirection = ghost.dfs(map, pacman.x, pacman.y);
+//         console.log(dfsDirection)
+//         if (dfsDirection) {
+//             ghost.nextDirection = dfsDirection;
+//             // console.log(ghost.nextDirection);
+//             ghost.changeDirectionIfPossible();
+//             ghost.moveForward();
+//             if (ghost.hitwall()) {
+//                 ghost.pauseMoving();
+//             }
+//         }
+//     }
 } else{ //default movement for ghosts is random
    ghost.changeDirectionIfPossible();
    ghost.moveForward();
@@ -620,7 +759,7 @@ function animate() {
   
 });
   
-  animationId = requestAnimationFrame(animate);
+  animationId = requestAnimationFrame(animate); //
 }
 
 
@@ -658,6 +797,7 @@ function restartGame(){
   });
   randomButtonValue = false;
   bfsButtonValue = false;
+  // dfsButtonValue = false;
 
   // Reset points and lives
   points = 1;
@@ -675,7 +815,7 @@ function restartGame(){
     [1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1],
     [0, 0, 0, 0, 1, 2, 1, 5, 5, 5, 5, 5, 5, 5, 1, 2, 1, 0, 0, 0, 0],
     [1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
-    [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2],
+    [1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1],
     [1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
     [0, 0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0, 0],
     [0, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0],
@@ -693,32 +833,6 @@ function restartGame(){
   startGame();
 }
 
-let map = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
-    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
-    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
-    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
-    [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
-    [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
-    [1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 1, 2, 1, 5, 5, 5, 5, 5, 5, 5, 1, 2, 1, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
-    [2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2],
-    [1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0, 0],
-    [0, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1],
-    [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
-    [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
-    [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
-    [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 2, 1, 1],
-    [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
-    [1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1],
-    [1, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-];
-
 
 
 
@@ -727,6 +841,8 @@ function updateLives() {
   let hearts = '❤️ '.repeat(lives);  // Repeat the heart emoji based on lives
   livesElement.innerHTML = `${hearts}`;
 }
+
+
 function drawFood() {
   map.forEach(( row, y) => {
     row.forEach(( cell , x) => {
@@ -746,23 +862,52 @@ function drawFood() {
     });
   });
 }
-function drawMap(){
-map.forEach((row, y)=> {
-  row.forEach((column, x)=> {
-    if(column == 1){
-      ctx.fillStyle = "black"; // Blue color for the walls
-        
-        // Draw the main block of the wall
-        ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
 
-      
-    }
+function drawMap(){
+  map.forEach((row, y)=> {
+    row.forEach((cell, x)=> {
+      if(cell == 1){
+        ctx.fillStyle = "black"; 
+          
+          // Draw the main block of the wall
+          ctx.fillRect(x * blockSize, y * blockSize, blockSize, blockSize);
+      }
+    })
   })
-})
 };
 
 
-function startGame() {
+
+
+let map = [
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+  [1, 2, 2, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+  [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+  [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1],
+  [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+  [1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1],
+  [0, 0, 0, 0, 1, 2, 1, 5, 5, 5, 5, 5, 5, 5, 1, 2, 1, 0, 0, 0, 0],
+  [1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 2, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+  [1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 1, 1, 1, 1, 2, 1, 2, 1, 2, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1],
+  [0, 0, 0, 0, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 0, 0, 0, 0],
+  [0, 0, 0, 0, 1, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 1, 0, 0, 0, 0],
+  [1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 1],
+  [1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1],
+  [1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1],
+  [1, 1, 2, 2, 1, 2, 1, 2, 1, 1, 1, 1, 1, 2, 1, 2, 1, 3, 2, 1, 1],
+  [1, 2, 2, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 1],
+  [1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1, 1, 1, 1, 1, 1, 2, 1],
+  [1, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1],
+  [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+];
+
+
+
+function startGame() {  //draw the map and the foods and display the start game button but does not actually start the game until player click the start button
   
   ctx.clearRect(0, 0, canvas.width, canvas.height);  // Clear the canvas
   drawMap();
@@ -779,8 +924,13 @@ function startGame() {
   canvas.addEventListener('click', handleStartClick);
 }
 
-// Separate the event handler function
-function handleStartClick(event) {
+
+
+
+
+
+
+function handleStartClick(event) { //clicking on start game to actually start the game which is the animate function
   const rect = canvas.getBoundingClientRect();
   const x = event.clientX - rect.left;
   const y = event.clientY - rect.top;
@@ -803,7 +953,7 @@ function handleStartClick(event) {
       scaledY <= messageY + clickableAreaHeight / 2
   ) {
     
-      animate();  // Start the game when the area is clicked
+      animate(); //start the game
   }
 }
 
@@ -811,24 +961,33 @@ function handleStartClick(event) {
 
 
 
-  let lives = 3;
-  let points = 0;
-  let gameStarted = false;
-  let ghosts = [];
-  const pacman = new Pacman(700, 700, blockSize, blockSize);
-  let ghostCount = 5;
-  for (let i = 0; i < ghostCount; i++) {
-    let range = 6 + i;  // Vary the range for each ghost (starting from 6)
-    
-    let newGhost = new Ghost(
-        280,         // X position
-        280,         // Y position
-        70,     // Width of the ghost
-        70,     // Height of the ghost
-        range             // Range (detection radius) increases for each ghost
-    );
-    
-    ghosts.push(newGhost);  // Add the ghost to the array
-}
-  startGame();
+let lives = 3;
+let points = 0;
+let gameStarted = false;
+let ghosts = [];
+const pacman = new Pacman(700, 700, blockSize, blockSize);
+// let ghostCount = 5;
+// for (let i = 0; i < ghostCount; i++) {
+//   let range = 6 + i;  // Vary the range for each ghost (starting from 6)
+//   let newGhost = new Ghost(
+//       280,         // X position/ the column
+//       280,         // Y position/ the row in grid if after conversion
+//       70,     // Width of the ghost
+//       70,     // Height of the ghost
+//       range             // Range (detection radius) increases for each ghost
+//   );
+  
+//   ghosts.push(newGhost);  // Add the ghost to the array
+// }
+let newGhost = new Ghost(
+  280,
+  280,
+  70,
+  70,
+  range = 6,
+)
+ghosts.push(newGhost)
+
+
+startGame();
 
